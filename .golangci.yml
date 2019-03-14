@@ -2,12 +2,12 @@ linters:
   enable:
     - gofmt
     - goimports
-    - govet
     - gosec
     - maligned
     - misspell
     - prealloc
     - stylecheck
+    # - unparam
 
 linters-settings:
   gofmt:

@@ -13,6 +13,3 @@
 
 # Build artifacts
 .build
-
-# Cover profile
-coverage.out

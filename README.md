@@ -151,18 +151,18 @@ See [LICENSE](LICENSE) for more information.
 
 <!-- Badges -->
 [build]: https://travis-ci.com/lukasmalkmus/spl
-[build_badge]: https://travis-ci.com/lukasmalkmus/spl.svg
+[build_badge]: https://img.shields.io/travis/com/lukasmalkmus/spl.svg?style=flat-square
 [coverage]: https://codecov.io/gh/lukasmalkmus/spl
-[coverage_badge]: https://codecov.io/gh/lukasmalkmus/spl/branch/master/graph/badge.svg
+[coverage_badge]: https://img.shields.io/codecov/c/github/lukasmalkmus/spl.svg?style=flat-square
 [report]: https://goreportcard.com/report/github.com/lukasmalkmus/spl
-[report_badge]: https://goreportcard.com/badge/github.com/lukasmalkmus/spl
+[report_badge]: https://goreportcard.com/badge/github.com/lukasmalkmus/spl?style=flat-square
 [docs]: https://godoc.org/github.com/lukasmalkmus/spl
-[docs_badge]: https://godoc.org/github.com/lukasmalkmus/spl?status.svg
+[docs_badge]: https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square
 [release]: https://github.com/lukasmalkmus/spl/releases
-[release_badge]: https://img.shields.io/github/release/lukasmalkmus/spl.svg
+[release_badge]: https://img.shields.io/github/release/lukasmalkmus/spl.svg?style=flat-square
 [license]: https://opensource.org/licenses/MIT
-[license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[license_badge]: https://img.shields.io/github/license/lukasmalkmus/spl.svg?color=blue&style=flat-square
 [license_status]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fspl?ref=badge_shield
-[license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fspl.svg?type=shield
+[license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fspl.svg
 [license_status_large]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fspl?ref=badge_large
 [license_status_large_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fspl.svg?type=large
