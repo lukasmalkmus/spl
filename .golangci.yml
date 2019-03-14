@@ -1,0 +1,18 @@
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - gosec
+    - maligned
+    - misspell
+    - prealloc
+    - stylecheck
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/lukasmalkmus/spl
+  govet:
+    check-shadowing: true

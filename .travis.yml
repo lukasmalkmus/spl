@@ -1,0 +1,97 @@
+language: go
+
+cache:
+  pip: true
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
+
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
+
+go:
+  - 1.x
+  - master
+
+env:
+  global:
+    - CC=clang-5.0
+    - PATH=$HOME/.local/bin:$PATH
+    - AWS_BUCKET_NAME=spl-travis-builds
+  matrix:
+    - TEST_SUIT=test
+    - TEST_SUIT=race
+    - TEST_SUIT=msan
+    - TEST_SUIT=bench
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+stages:
+  - lint
+  - test
+  - build
+  - name: release
+    if: branch = master
+
+script: make $TEST_SUIT
+
+after_success:
+  - curl -d "repo=github.com/${TRAVIS_REPO_SLUG}" https://goreportcard.com/checks
+  - if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+    - stage: lint
+      env: TEST_SUIT=none
+      script: make lint
+      after_success: skip
+
+    - &build
+      stage: build
+      env: TARGET=darwin
+      before_install:
+        - pip3 install --user awscli
+        - mkdir -p ~/$TRAVIS_BUILD_NUMBER
+        - aws s3 sync s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
+      script: make build GOOS=$TARGET
+      after_success:
+        - cp .build/* ~/$TRAVIS_BUILD_NUMBER/
+        - aws s3 sync ~/$TRAVIS_BUILD_NUMBER s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER
+    - <<: *build
+      env: TARGET=linux
+    - <<: *build
+      env: TARGET=windows
+
+    - stage: release
+      env: TEST_SUIT=none
+      before_install:
+        - pip3 install --user awscli
+        - mkdir -p ~/$TRAVIS_BUILD_NUMBER
+        - aws s3 sync s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
+      script: skip
+      before_deploy:
+        - zip -j spl-${TRAVIS_TAG}-darwin-amd64.zip ~/$TRAVIS_BUILD_NUMBER/spl-darwin-amd64 configs/* README.md CHANGELOG.md VERSION LICENSE
+        - zip -j spl-${TRAVIS_TAG}-linux-amd64.zip ~/$TRAVIS_BUILD_NUMBER/spl-linux-amd64 configs/* README.md CHANGELOG.md VERSION LICENSE
+        - zip -j spl-${TRAVIS_TAG}-windows-amd64.zip ~/$TRAVIS_BUILD_NUMBER/spl-windows-amd64 configs/* README.md CHANGELOG.md VERSION LICENSE
+        - sha256sum *zip > SHASUMS256.txt
+      deploy:
+        provider: releases
+        api_key:
+          secure: s2GrpM3Dh4EjEa14pkQdyuUkkSvrxEcwskSfAHX3nQjTC79O2bjJ7OVpjYKFeVCwtFIszNBAZBjE5g5Iak2HT2GURfnmBIpS2r10buYePo/L5w1Upf8caZdjgyHOIX5u4cittuoyzET7nUg54J8ubIOwR6kvjM7eg6fAzI19YUhKgbChOjzIh3ZpiZB/QHL8vnC1b8Kp6JF7UN0mJxja9CuqVYUMkrR+K3pINVINKngPoNfh5Y8+Kgf8Z2Yn4MoWzaBaLkf8uldJsDylMEs+x3/fAuAAG+RKa+yqYlO+HzjvSAk0F9Fx0HGdsActaOE7WN2J5XsthZgWvZBRJcLayxSAcOkFPm3kkcFs0A0Kh4F34dBS1Hb5aPRntiZCsUj7/ZiN3aIM6HUJpJtO0K4fP2fF77INfESYP+qA5sckKb+4yDJuIvTbnmRPrRlSIlB9ekUHeEZnhyZP/lpTa7I1MBkNDMpfizwFK/vpwwjA1IBsEqNEjFiHlrbAC2t43FpO9Iuz0x5bVL3VE1a+AKm5cDdStzmZE/xG0qcLEFNLISIariO+9bdpS3minkna3mH5s7taiaCsntM37cCcdZlvrpMXbvuilZyNDtH7xdwI+1pbS5uXaZ0W4pL+RdLzVCZc654CJe35pgZSVcRr9V2TegOVCSquHKfmjjVL1tZDKiA=
+        file: 
+          - spl-${TRAVIS_TAG}-darwin-amd64.zip
+          - spl-${TRAVIS_TAG}-linux-amd64.zip
+          - spl-${TRAVIS_TAG}-windows-amd64.zip
+          - SHASUMS256.txt
+        skip_cleanup: true
+        on:
+          tags: true
+          repo: ${TRAVIS_REPO_SLUG}
+      after_success:
+        - aws s3 rm --recursive s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER

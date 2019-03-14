@@ -1,0 +1,6 @@
+# SPL COMPILER TOOLCHAIN CONFIGURATION
+
+# Source code formatter configuration.
+[format]
+# Indentation width used.
+indent = 4
