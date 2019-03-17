@@ -41,16 +41,14 @@ stages:
 
 script: make $TEST_SUIT
 
-after_success:
-  - curl -d "repo=github.com/${TRAVIS_REPO_SLUG}" https://goreportcard.com/checks
-  - if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash)
+after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash)
 
 jobs:
   include:
     - stage: lint
       env: TEST_SUIT=none
       script: make lint
-      after_success: skip
+      after_success: curl -d "repo=github.com/${TRAVIS_REPO_SLUG}" https://goreportcard.com/checks
 
     - &build
       stage: build
