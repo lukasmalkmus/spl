@@ -343,6 +343,7 @@ func (p *Parser) checkExpr(x ast.Expr) ast.Expr {
 	case *ast.UnaryExpr:
 	case *ast.BinaryExpr:
 	case *ast.IndexExpr:
+	case *ast.CallExpr:
 	default:
 		p.errorExpected(x.Pos(), "expression")
 		return &ast.BadExpr{From: x.Pos(), To: x.End()}
@@ -401,7 +402,7 @@ L:
 			if lhs {
 				p.resolve(x)
 			}
-			x = p.parseCall(x)
+			x = p.parseCall(p.checkExpr(x))
 		default:
 			break L
 		}
@@ -454,7 +455,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 	return &ast.IndexExpr{X: x, Lbrack: lbrack, Index: index, Rbrack: rbrack}
 }
 
-func (p *Parser) parseCall(fun ast.Expr) *ast.CallExpr {
+func (p *Parser) parseCall(pro ast.Expr) *ast.CallExpr {
 	lparen := p.expect(token.LPAREN)
 	p.exprLev++
 	var list []ast.Expr
@@ -467,7 +468,7 @@ func (p *Parser) parseCall(fun ast.Expr) *ast.CallExpr {
 	}
 	p.exprLev--
 	rparen := p.expectClosing(token.RPAREN, "argument list")
-	return &ast.CallExpr{Fun: fun, Lparen: lparen, Args: list, Rparen: rparen}
+	return &ast.CallExpr{Pro: pro, Lparen: lparen, Args: list, Rparen: rparen}
 }
 
 func (p *Parser) tokPrec() (token.Token, int) {
@@ -491,18 +492,20 @@ func unparen(x ast.Expr) ast.Expr {
 
 // parseStmt parses lexical tokens into a Statement AST object.
 func (p *Parser) parseStmt() (stmt ast.Stmt) {
-	p.next()
 	switch p.tok {
 	case token.VAR, token.TYPE:
 		stmt = &ast.DeclStmt{Decl: p.parseDecl(stmtStart)}
 	case token.IDENT, token.INT, token.LPAREN,
 		token.LBRACK, token.ADD, token.SUB, token.MUL, token.NOT:
 		stmt = p.parseSimpleStmt()
+		p.expectSemi()
 	case token.LBRACE:
 		stmt = p.parseBlockStmt()
 		p.expectSemi()
 	case token.WHILE:
 		stmt = p.parseWhileStmt()
+	case token.IF:
+		stmt = p.parseIfStmt()
 	default:
 		pos := p.pos
 		p.errorExpected(pos, "statement")
@@ -537,6 +540,30 @@ func (p *Parser) parseWhileStmt() ast.Stmt {
 		While: pos,
 		Cond:  x,
 		Body:  body,
+	}
+}
+
+func (p *Parser) parseIfStmt() ast.Stmt {
+	pos := p.expect(token.IF)
+	_ = p.expect(token.LPAREN)
+	prevLev := p.exprLev
+	p.exprLev = -1
+	x := p.checkExpr(p.parseExpr(false))
+	p.exprLev = prevLev
+	_ = p.expect(token.RPAREN)
+	body := p.parseBlockStmt()
+
+	var alt ast.Stmt
+	if p.tok == token.ELSE {
+		p.next()
+		alt = p.parseBlockStmt()
+	}
+
+	return &ast.IfStmt{
+		If:   pos,
+		Cond: x,
+		Body: body,
+		Else: alt,
 	}
 }
 
@@ -576,8 +603,8 @@ var unresolved = new(ast.Object)
 
 func (p *Parser) tryResolve(x ast.Expr, collectUnresolved bool) {
 	// Nothing to do if x is not an identifier.
-	ident, _ := x.(*ast.Ident)
-	if ident == nil {
+	ident, ok := x.(*ast.Ident)
+	if !ok {
 		return
 	}
 

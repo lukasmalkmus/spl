@@ -47,6 +47,7 @@ func (*BlockStmt) stmtNode()  {}
 func (*ExprStmt) stmtNode()   {}
 func (*AssignStmt) stmtNode() {}
 func (*WhileStmt) stmtNode()  {}
+func (*IfStmt) stmtNode()     {}
 
 // Decl is a simple programing language (SPL) declaration.
 type Decl interface {
@@ -152,7 +153,7 @@ type (
 
 	// CallExpr represents an expression node followed by an argument list.
 	CallExpr struct {
-		Fun    Expr
+		Pro    Expr
 		Lparen token.Position
 		Args   []Expr
 		Rparen token.Position
@@ -202,7 +203,7 @@ func (x *IndexExpr) Pos() token.Position { return x.Lbrack }
 func (x *IndexExpr) End() token.Position { return x.Rbrack }
 
 // Pos implements the Node interface.
-func (x *CallExpr) Pos() token.Position { return x.Fun.Pos() }
+func (x *CallExpr) Pos() token.Position { return x.Pro.Pos() }
 
 // End implements the Node interface.
 func (x *CallExpr) End() token.Position { return x.Rparen }
@@ -274,7 +275,15 @@ type (
 	WhileStmt struct {
 		While token.Position
 		Cond  Expr
-		Body  *BlockStmt
+		Body  Stmt
+	}
+
+	// IfStmt represents an if node.
+	IfStmt struct {
+		If   token.Position
+		Cond Expr
+		Body Stmt
+		Else Stmt
 	}
 )
 
@@ -313,6 +322,17 @@ func (s *WhileStmt) Pos() token.Position { return s.While }
 
 // End implements the Node interface.
 func (s *WhileStmt) End() token.Position { return s.Body.End() }
+
+// Pos implements the Node interface.
+func (s *IfStmt) Pos() token.Position { return s.If }
+
+// End implements the Node interface.
+func (s *IfStmt) End() token.Position {
+	if s.Else != nil {
+		return s.Else.End()
+	}
+	return s.Body.End()
+}
 
 // -----------------------------------------------------------------------------
 // Declarations
