@@ -24,10 +24,10 @@ GOLANGCI_LINT	:= $(GOPATH)/bin/golangci-lint
 COVERPROFILE 	:= coverage.out
 
 # BUILD INFORMATION
-GOFLAGS		?= -buildmode=exe -mod=vendor -tags netgo -installsuffix cgo \
+GOFLAGS		?= -buildmode=exe -mod=vendor -tags=netgo -installsuffix=cgo \
 				-gcflags=-trimpath=$(GOPATH)/src \
 				-asmflags=-trimpath=$(GOPATH)/src \
-				-ldflags '-s -w \
+				-ldflags='-s -w \
 				-X $(MOD_NAME)/pkg/version.BuildTime=$(BUILD_TIME) \
 				-X $(MOD_NAME)/pkg/version.Commit=$(COMMIT) \
 				-X $(MOD_NAME)/pkg/version.Release=$(RELEASE) \
@@ -48,9 +48,9 @@ ifeq ($(GOOS),linux)
 	endif
 endif
 
-.PHONY: all bench build config cover clean dep fmt install lint msan race test tools
+.PHONY: all bench build config cover clean dep dep-update fmt install lint msan race test tools
 
-all: fmt lint test bench race build config
+all: lint test race bench build config
 
 bench: $(GOFILES)
 	@echo ">> running benchmarks"
@@ -73,12 +73,15 @@ clean:
 	@rm -rf $(COVERPROFILE)
 
 dep:
-	@echo ">> updating & installing dependencies"
-	@$(GO) get -u=patch
+	@echo ">> installing dependencies"
 	@$(GO) mod tidy
 	@$(GO) mod download
 	@$(GO) mod verify
 	@$(GO) mod vendor
+
+dep-update:
+	@echo ">> updating dependencies"
+	@$(GO) get -u=patch
 
 fmt: $(GOFILES)
 	@echo ">> formatting code"
@@ -92,11 +95,11 @@ lint: $(GOFILES) | $(GOLANGCI_LINT)
 
 msan: $(GOFILES)
 	@echo ">> running memory sanitizer test"
-	@$(CGO) -mod=vendor test -short -msan ./...
+	@$(CGO) test -mod=vendor -short -msan ./...
 
 race: $(GOFILES)
 	@echo ">> running race detector test"
-	@$(CGO) -mod=vendor test -short -race ./...
+	@$(CGO) test -mod=vendor -short -race ./...
 
 test: $(GOFILES)
 	@echo ">> running tests"
