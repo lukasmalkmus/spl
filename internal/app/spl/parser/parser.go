@@ -79,7 +79,7 @@ func ParseStatement(src string) (ast.Stmt, error) {
 
 // Feed will provide the parser with a new scanner source, which effectively
 // adds a new source of tokens. This preserves the previous parsing context
-// while parsing new data.
+// when parsing new data.
 func (p *Parser) Feed(r io.Reader) { p.scanner = scanner.New(r) }
 
 // Parse parses the source the Parser is initialized with.

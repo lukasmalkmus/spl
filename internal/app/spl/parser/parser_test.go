@@ -32,7 +32,7 @@ func TestParser_parseDecl(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"variable declaration",
+			"variable",
 			"var i: int;",
 			&ast.VarDecl{
 				Name: &ast.Ident{NamePos: pos(1, 5), Name: "i"},
@@ -41,7 +41,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"simple type declaration",
+			"type",
 			"type myInt = int;",
 			&ast.TypeDecl{
 				Name:   &ast.Ident{NamePos: pos(1, 6), Name: "myInt"},
@@ -51,7 +51,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"array type declaration",
+			"type array",
 			"type vector = array [5] of int;",
 			&ast.TypeDecl{
 				Name:   &ast.Ident{NamePos: pos(1, 6), Name: "vector"},
@@ -66,7 +66,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"double array type declaration",
+			"type array double",
 			"type matrix = array [3] of array [5] of int;",
 			&ast.TypeDecl{
 				Name:   &ast.Ident{NamePos: pos(1, 6), Name: "matrix"},
@@ -86,7 +86,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"procedure declaration",
+			"procedure",
 			"proc empty() {}",
 			&ast.ProcDecl{
 				Name: &ast.Ident{
@@ -100,7 +100,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"procedure declaration one param",
+			"procedure one param",
 			"proc one(a: int) {}",
 			&ast.ProcDecl{
 				Name: &ast.Ident{NamePos: pos(1, 6), Name: "one"},
@@ -120,7 +120,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"procedure declaration two params",
+			"procedure two params",
 			"proc two(a: int, b: int) {}",
 			&ast.ProcDecl{
 				Name: &ast.Ident{NamePos: pos(1, 6), Name: "two"},
@@ -144,7 +144,7 @@ func TestParser_parseDecl(t *testing.T) {
 			false,
 		},
 		{
-			"procedure declaration advanced",
+			"procedure two reference params",
 			"proc swap(ref i: int, ref j: int) {}",
 			&ast.ProcDecl{
 				Name: &ast.Ident{NamePos: pos(1, 6), Name: "swap"},
@@ -173,9 +173,7 @@ func TestParser_parseDecl(t *testing.T) {
 	for _, tt := range tests {
 		_ = t.Run(tt.name, func(t *testing.T) {
 			p := New(strings.NewReader(tt.text))
-			p.openScope()
-			p.pkgScope = p.topScope
-			p.next()
+			initParser(p)
 			got, err := p.parseDecl(declStart), p.errors
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseDecl() error = %v, wantErr %v", err, tt.wantErr)
@@ -187,6 +185,12 @@ func TestParser_parseDecl(t *testing.T) {
 
 func pos(line, column int) token.Position {
 	return token.Position{Filename: "", Line: line, Column: column}
+}
+
+func initParser(p *Parser) {
+	p.openScope()
+	p.pkgScope = p.topScope
+	p.next()
 }
 
 // equals fails the test if got is not equal to want.
