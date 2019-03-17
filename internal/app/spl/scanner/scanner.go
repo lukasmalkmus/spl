@@ -44,13 +44,18 @@ func (s *Scanner) Scan() (token.Token, string, token.Position) {
 	ch, pos := s.read()
 
 	// If we see a letter consume as an ident or reserved word.
-	// If we see a digit or "'" consume as an integer.
+	// If we see a digit consume as an integer.
+	// If we see a "'" consume as an integer as well, but us a specialized
+	// scanning method.
 	if isLetter(ch) {
 		s.unread()
 		return s.scanIdent()
-	} else if isDigit(ch) || ch == '\'' {
+	} else if isDigit(ch) {
 		s.unread()
 		return s.scanInteger()
+	} else if ch == '\'' {
+		s.unread()
+		return s.scanSpecialInteger()
 	}
 
 	// Otherwise tokenize the individual characters. No match results in an
@@ -173,7 +178,7 @@ func (s *Scanner) scanInteger() (token.Token, string, token.Position) {
 	for {
 		if ch, _ := s.read(); ch == eof {
 			break
-		} else if !isLetter(ch) && !isDigit(ch) && ch != '\'' && ch != '\\' {
+		} else if !isLetter(ch) && !isDigit(ch) {
 			s.unread()
 			break
 		} else {
@@ -181,35 +186,63 @@ func (s *Scanner) scanInteger() (token.Token, string, token.Position) {
 		}
 	}
 
-	b := buf.Bytes()
-	if b[0] == '\'' {
-		// If the first character is a tick the last one must be one, too and
-		// the input is expected to be 3 or 4 characters.
-		if l := len(b); b[l-1] != '\'' || (l != 3 && l != 4) {
-			return token.ILLEGAL, buf.String(), pos
-		}
+	// Uppercase 'X' not allowed in hexadecimal representation.
+	if bytes.ContainsRune(buf.Bytes(), 'X') {
+		return token.ILLEGAL, buf.String(), pos
+	} else if _, err := strconv.ParseInt(buf.String(), 0, 32); err != nil {
+		return token.ILLEGAL, buf.String(), pos
+	}
+	return token.INT, buf.String(), pos
+}
 
-		// If the second character is a backslash (which indicates an ASCII
-		// control character) it must be followed by another single character.
-		// If the second character is not a backslack, is must be a letter.
-		if b[1] == '\\' && !isLetter(rune(b[2])) {
-			return token.ILLEGAL, buf.String(), pos
-		} else if b[1] != '\\' && !isLetter(rune(b[1])) {
-			return token.ILLEGAL, buf.String(), pos
+// scanSpecialInteger consumes the current rune and all contiguous special
+// integer runes.
+func (s *Scanner) scanSpecialInteger() (token.Token, string, token.Position) {
+	var buf bytes.Buffer
+	ch, pos := s.read()
+	_, _ = buf.WriteRune(ch)
+
+	// Read every subsequent character into the buffer. Non-integer characters,
+	// multiple whitespaces and EOF will cause the loop to exit.
+	var (
+		charCount uint8 = 1 // We already saw one.
+		sqmCount  uint8 = 1 // We already saw one.
+		wsCount   uint8
+	)
+	for {
+		if ch, _ := s.read(); ch == eof {
+			break
+		} else if (sqmCount == 2 && charCount >= 3) || sqmCount > 2 || wsCount > 2 {
+			s.unread()
+			break
+		} else {
+			charCount++
+			if ch == '\'' {
+				sqmCount++
+			} else if ch == ' ' {
+				wsCount++
+			}
+			_, _ = buf.WriteRune(ch)
 		}
-	} else {
-		if _, err := strconv.ParseInt(buf.String(), 0, 32); err != nil {
-			return token.ILLEGAL, buf.String(), pos
-		}
-		// val := strings.ReplaceAll(buf.String(), "X", "x")
+	}
+	b := buf.Bytes()
+
+	// The first character is a tick so the last one must be one, too.
+	if l := len(b); l < 3 || b[l-1] != '\'' {
+		return token.ILLEGAL, buf.String(), pos
 	}
 
-	// If the first character is a backslash, the literal must be an ASCII
-	// control character.
-	// if buf.Bytes()[0] == '\\' && buf.Len() == 2 {
-	// 	return token.INT, []rune(buf.String()), pos
-	// }
-	return token.INT, buf.String(), pos
+	// If the length of the input is three, the character encapsuled by the
+	// single quotation marks must be a printable ASCII character.
+	// If the length of the input is four, the characters encapsuled by the
+	// single quotation marks must form an ASCII escape sequence by the first
+	// character being a backslash and the second character being a letter.
+	if len(b) == 3 && b[1] > 31 && b[1] < 127 {
+		return token.INT, buf.String(), pos
+	} else if len(b) == 4 && b[1] == '\\' && isLetter(rune(b[2])) {
+		return token.INT, buf.String(), pos
+	}
+	return token.ILLEGAL, buf.String(), pos
 }
 
 // skipWhitespace consumes the current rune and all contiguous newline and

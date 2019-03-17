@@ -28,11 +28,11 @@ func TestScanner_Scan(t *testing.T) {
 		{"1foo", token.ILLEGAL, "1foo", 1}, // Integer can't suffix identifier
 		{".", token.ILLEGAL, ".", 1},
 		{".123", token.ILLEGAL, ".", 1},      // Dot can't prefix integer.
-		{"123x", token.ILLEGAL, "123x", 1},   // Illegal integer (wrong hex representation)
-		{"0xx08", token.ILLEGAL, "0xx08", 1}, // Illegal hex syntax
-		{"''", token.ILLEGAL, "''", 1},       // Illegal integer (ASCII value) syntax
-		{"'''", token.ILLEGAL, "'''", 1},     // Illegal integer (ASCII value) syntax
-		{"'\\'", token.ILLEGAL, "'\\'", 1},   // Illegal integer (ASCII control character value) syntax
+		{"123x", token.ILLEGAL, "123x", 1},   // Illegal integer
+		{"0XAB", token.ILLEGAL, "0XAB", 1},   // Illegal integer
+		{"0xx08", token.ILLEGAL, "0xx08", 1}, // Illegal integer
+		{"'", token.ILLEGAL, "'", 1},         // Illegal integer (ASCII syntax)
+		{"''", token.ILLEGAL, "''", 1},       // Illegal integer (ASCII syntax)
 		{" x", token.IDENT, "x", 1},
 		{"\nx", token.IDENT, "x", 2},
 		{"", token.EOF, "", 1},
@@ -57,8 +57,11 @@ func TestScanner_Scan(t *testing.T) {
 		{"128", token.INT, "128", 1},
 		{"1234", token.INT, "1234", 1},
 		{"0x1a2f3F4e", token.INT, "0x1a2f3F4e", 1}, // Hex
-		{"'a'", token.INT, "'a'", 1},               // ASCII character interpreted as number
-		{`'\n'`, token.INT, `'\n'`, 1},             // ASCII control character interpreted as number
+		{"'''", token.INT, "'''", 1},               // ASCII character interpreted as integer
+		{"' '", token.INT, "' '", 1},               // ASCII character interpreted as integer
+		{"'a'", token.INT, "'a'", 1},               // ASCII character interpreted as integer
+		{"'0' ", token.INT, "'0'", 1},              // ASCII character interpreted as integer
+		{`'\n'`, token.INT, `'\n'`, 1},             // ASCII control character interpreted as integer
 
 		// Operators and delimiters
 		{"+", token.ADD, "+", 1},
@@ -128,7 +131,7 @@ func TestScanner_ScanFullValidProgram(t *testing.T) {
 	for tok, _, _ := s.Scan(); tok != token.EOF; tok, _, _ = s.Scan() {
 		count++
 	}
-	const expectedTokCount = 415
+	const expectedTokCount = 412
 	equals(t, count, expectedTokCount)
 }
 
