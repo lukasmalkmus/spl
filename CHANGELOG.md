@@ -11,10 +11,11 @@ The format is based on [Keep a Changelog] and this project adheres to
 
 ### Added
 
-- Initial implementation and release.
+- Initial implementation and release
 
 <!-- Releases -->
 [Unreleased]: https://github.com/lukasmalkmus/spl/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/lukasmalkmus/spl/releases/tag/v0.0.1
 
 <!-- Links -->
 [Keep a Changelog]: http://keepachangelog.com/en/1.0.0/
