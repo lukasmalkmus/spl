@@ -67,7 +67,7 @@ capital letters. A third alternative for the representation of numbers is the
 inclusion of exactly one character in apostrophes. The number shown is then the
 ASCII code of the character between the apostrophe. The character string \n is
 considered a character with the meaning "line break" (0x0a). Numbers must be in
-the range 0..2^31-1; the unary operator"-" is available for displaying negative
+the range 0..2^31-1; the unary operator "-" is available for displaying negative
 numbers (see below). The interpretation of numbers that fall outside the
 specified range is undefined.
 Examples:
