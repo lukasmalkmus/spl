@@ -74,6 +74,7 @@ func NewFileParser(f *os.File) *Parser {
 // ParseStatement parses a single SPL statement.
 func ParseStatement(src string) (ast.Stmt, error) {
 	p := New(strings.NewReader(src))
+	p.next()
 	return p.parseStmt(), p.errors
 }
 
@@ -501,7 +502,6 @@ func (p *Parser) parseStmt() (stmt ast.Stmt) {
 		p.expectSemi()
 	case token.LBRACE:
 		stmt = p.parseBlockStmt()
-		p.expectSemi()
 	case token.WHILE:
 		stmt = p.parseWhileStmt()
 	case token.IF:
@@ -534,7 +534,7 @@ func (p *Parser) parseWhileStmt() ast.Stmt {
 	x := p.checkExpr(p.parseExpr(false))
 	p.exprLev = prevLev
 	_ = p.expect(token.RPAREN)
-	body := p.parseBlockStmt()
+	body := p.parseStmt()
 
 	return &ast.WhileStmt{
 		While: pos,
@@ -551,12 +551,12 @@ func (p *Parser) parseIfStmt() ast.Stmt {
 	x := p.checkExpr(p.parseExpr(false))
 	p.exprLev = prevLev
 	_ = p.expect(token.RPAREN)
-	body := p.parseBlockStmt()
+	body := p.parseStmt()
 
 	var alt ast.Stmt
 	if p.tok == token.ELSE {
 		p.next()
-		alt = p.parseBlockStmt()
+		alt = p.parseStmt()
 	}
 
 	return &ast.IfStmt{

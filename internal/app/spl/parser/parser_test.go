@@ -24,6 +24,76 @@ func TestParser_ParseFullValidProgram(t *testing.T) {
 	}
 }
 
+func TestParser_ParseStatement(t *testing.T) {
+	tests := []struct {
+		name    string
+		text    string
+		want    ast.Stmt
+		wantErr bool
+	}{
+		{
+			"assignment",
+			"i := 0;",
+			&ast.AssignStmt{
+				Left:   &ast.Ident{NamePos: pos(1, 1), Name: "i"},
+				Tok:    token.ASSIGN,
+				TokPos: pos(1, 3),
+				Right:  &ast.IntLit{ValuePos: pos(1, 6), Value: "0"},
+			},
+			false,
+		},
+		{
+			"if",
+			"if (i = 0) i + 1;",
+			&ast.IfStmt{
+				If: pos(1, 1),
+				Cond: &ast.BinaryExpr{
+					OpPos: pos(1, 7),
+					Op:    token.EQL,
+					X:     &ast.Ident{NamePos: pos(1, 5), Name: "i"},
+					Y:     &ast.IntLit{ValuePos: pos(1, 9), Value: "0"},
+				},
+				Body: &ast.ExprStmt{X: &ast.BinaryExpr{
+					OpPos: pos(1, 14),
+					Op:    token.ADD,
+					X:     &ast.Ident{NamePos: pos(1, 12), Name: "i"},
+					Y:     &ast.IntLit{ValuePos: pos(1, 16), Value: "1"},
+				}},
+			},
+			false,
+		},
+		{
+			"while",
+			"while (i > 0) i - 1;",
+			&ast.WhileStmt{
+				While: pos(1, 1),
+				Cond: &ast.BinaryExpr{
+					OpPos: pos(1, 10),
+					Op:    token.GTR,
+					X:     &ast.Ident{NamePos: pos(1, 8), Name: "i"},
+					Y:     &ast.IntLit{ValuePos: pos(1, 12), Value: "0"},
+				},
+				Body: &ast.ExprStmt{X: &ast.BinaryExpr{
+					OpPos: pos(1, 17),
+					Op:    token.SUB,
+					X:     &ast.Ident{NamePos: pos(1, 15), Name: "i"},
+					Y:     &ast.IntLit{ValuePos: pos(1, 19), Value: "1"},
+				}},
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		_ = t.Run(tt.name, func(t *testing.T) {
+			got, perr := ParseStatement(tt.text)
+			if err, _ := perr.(*ErrorList); (err != nil) != tt.wantErr {
+				t.Errorf("parseDecl() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			equals(t, got, tt.want)
+		})
+	}
+}
+
 func TestParser_parseDecl(t *testing.T) {
 	tests := []struct {
 		name    string
