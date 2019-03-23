@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -83,12 +84,12 @@ func ParseStatement(src string) (ast.Stmt, error) {
 // when parsing new data.
 func (p *Parser) Feed(r io.Reader) { p.scanner = scanner.New(r) }
 
-// Parse parses the source the Parser is initialized with.
-func (p *Parser) Parse() {
+// Parse parses the source the Parser is initialized with into an AST program.
+func (p *Parser) Parse() (*ast.Program, error) {
 	// If scanning the first token fails, this is probably not a spl source
 	// file.
 	if p.next(); p.errors.Len() != 0 {
-		return
+		return nil, errors.New("not a spl source file")
 	}
 
 	p.openScope()
@@ -108,7 +109,14 @@ func (p *Parser) Parse() {
 			i++
 		}
 	}
-	_ = decls
+
+	return &ast.Program{
+		Name:       p.pos.Filename,
+		Decls:      decls,
+		Unresolved: p.unresolved[0:i],
+	}, p.errors
+}
+
 // ParseExpr parses an expression.
 func ParseExpr(x string) (ast.Expr, error) {
 	p := New(strings.NewReader(x))

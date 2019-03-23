@@ -395,8 +395,20 @@ func (d *ProcDecl) End() token.Position { return d.Body.End() }
 // -----------------------------------------------------------------------------
 // Helpers
 
-// Program represents a collection of simple programing language (SPL)
-// statements.
+// Program represents a simple programing language (SPL) program AST.
 type Program struct {
-	Statements []Stmt
+	Name       string
+	Decls      []Decl
+	Unresolved []*Ident
+}
+
+// Pos implements the Node interface.
+func (p *Program) Pos() token.Position { return token.Position{Filename: p.Name, Line: 1, Column: 1} }
+
+// End implements the Node interface.
+func (p *Program) End() token.Position {
+	if n := len(p.Decls); n > 0 {
+		return p.Decls[n-1].End()
+	}
+	return token.Position{Filename: p.Name, Line: 1, Column: 1}
 }

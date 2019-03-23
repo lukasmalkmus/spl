@@ -17,10 +17,17 @@ func TestParser_ParseFullValidProgram(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to open testdata:", err)
 	}
-
 	p := NewFileParser(f)
-	if p.Parse(); p.errors.Len() > 0 {
+
+	prog, _ := p.Parse()
+	if p.errors.Len() > 0 {
 		t.Errorf("expected no errors got %d: %s", p.errors.Len(), p.errors.Error())
+	}
+	if len(prog.Decls) == 0 {
+		t.Errorf("didn't parse any top level declarations")
+	}
+	if prog.Name != "../testdata/valid.spl" {
+		t.Errorf("invalid program name")
 	}
 }
 
