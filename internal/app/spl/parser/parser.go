@@ -109,6 +109,27 @@ func (p *Parser) Parse() {
 		}
 	}
 	_ = decls
+// ParseExpr parses an expression.
+func ParseExpr(x string) (ast.Expr, error) {
+	p := New(strings.NewReader(x))
+
+	p.openScope()
+	p.pkgScope = p.topScope
+	expr := p.parseRHS()
+	p.closeScope()
+
+	// If a semicolon was inserted, consume it. Report an error if there's more
+	// tokens.
+	if p.tok == token.SEMICOLON {
+		p.next()
+	}
+	p.expect(token.EOF)
+
+	if p.errors.Len() > 0 {
+		p.errors.Sort()
+		return nil, p.errors.Err()
+	}
+	return expr, nil
 }
 
 // -----------------------------------------------------------------------------
