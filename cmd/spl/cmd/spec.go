@@ -130,12 +130,12 @@ constructed using the same type expression.
 Example of the same types:
 
 	type typ1 = array[5] of int;
-	type type type2 = type1;
+	type typ2 = type1;
 
 Example of different types:
 
 	type typ1 = array[5] of int;
-	type type type2 = array[5] of int;
+	type typ2 = array[5] of int;
 
 Declaratives
 
