@@ -1,6 +1,6 @@
 # lukasmalkmus/spl
 
-> A toolchain for a simple programming language. - by **[Lukas Malkmus]**
+> A toolchain for a simple programming language, inspired by the Go toolchain. - by **[Lukas Malkmus]**
 
 [![Build Status][build_badge]][build]
 [![Coverage Status][coverage_badge]][coverage]
@@ -22,7 +22,10 @@
 ## Introduction
 
 *spl* is a compiler and toolchain for a **s**imple **p**rogramming **l**anguage
-I had to build a compiler for in an university course on building compilers.
+I had to build a compiler for in an university course on building compilers. The
+design is heavily inspired by the packages of the [Go][go] language and features
+a handwritten parser as well as the two excellent books from [Thorsten Ball] on
+building an [interpreter][interpreter_book] and a [compiler][compiler_book]. 
 
 The languages specification can be reviewed [here][spl_spec] (in german).
 A machine translated one in english (yes, I'm a lazy fuck) can be reviewed
@@ -144,6 +147,10 @@ See [LICENSE](LICENSE) for more information.
 
 <!-- Links -->
 [Lukas Malkmus]: https://github.com/lukasmalkmus
+[go]: https://golang.org
+[Thorsten Ball]: https://github.com/mrnugget
+[interpreter_book]: https://interpreterbook.com
+[compiler_book]: https://compilerbook.com
 [spl_spec]: https://homepages.thm.de/~hg52/lv/compiler/praktikum/SPL-1.2.html
 [go mod]: https://golang.org/cmd/go/#hdr-Module_maintenance
 [Twelve Factor Application]: https://12factor.net
