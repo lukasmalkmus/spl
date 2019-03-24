@@ -268,6 +268,7 @@ func (s *Scanner) read() (rune, token.Position) {
 		s.resetColumnCount = false
 	}
 	s.pos.Column++
+	s.pos.Char++
 
 	// Read from the underlying reader.
 	ch, _, err := s.r.ReadRune()
@@ -281,6 +282,7 @@ func (s *Scanner) read() (rune, token.Position) {
 func (s *Scanner) unread() {
 	_ = s.r.UnreadRune()
 	s.pos.Column--
+	s.pos.Char--
 }
 
 // unread peeks for the next rune from the buffered reader.

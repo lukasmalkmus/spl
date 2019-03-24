@@ -7,12 +7,14 @@ import (
 // NoPos is the Position zero value and is not valid.
 var NoPos Position
 
-// Position describes an arbitrary source position including the file, line, and
-// column location. A Position is valid if the line number is > 0.
+// Position describes an arbitrary source position including the file, line,
+// column and total character count. A Position is valid if the line number is
+// > 0.
 type Position struct {
 	Filename string
 	Line     int
 	Column   int
+	Char     int
 }
 
 // IsValid reports whether the position is valid.

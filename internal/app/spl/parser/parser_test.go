@@ -273,7 +273,11 @@ func initParser(p *Parser) {
 // equals fails the test if got is not equal to want.
 func equals(tb testing.TB, got, want interface{}) {
 	tb.Helper()
-	if diff := cmp.Diff(got, want, cmpopts.IgnoreTypes(&ast.Object{})); diff != "" {
+	opts := cmp.Options{
+		cmpopts.IgnoreTypes(&ast.Object{}),
+		cmpopts.IgnoreFields(token.Position{}, "Char"),
+	}
+	if diff := cmp.Diff(got, want, opts...); diff != "" {
 		tb.Errorf("\033[31m\n\n\tgot: %#+v\n\n\twant: %#+v\n\n\t%s\033[39m\n\n", got, want, diff)
 	}
 }
