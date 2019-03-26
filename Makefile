@@ -41,10 +41,10 @@ endif
 # Add msan target if system is linux/amd64 or linux/arm64.
 ifeq ($(GOOS),linux)
 	ifeq ($(shell uname -m),x86_64)
-		all	= fmt lint test bench race msan build config
+		all	= lint test race bench msan build config
 	endif
 	ifeq ($(shell uname -m),arm64)
-		all	= fmt lint test bench race msan build config
+		all	= lint test race bench msan build config
 	endif
 endif
 
@@ -117,7 +117,7 @@ tools: | $(GOLANGCI_LINT)
 
 $(GOPATH)/bin/spl: $(GOFILES)
 	@echo ">> installing spl binary"
-	@$(GO) install $(GOFLAGS) ./cmd/spl
+	@$(GO) install -mod=vendor $(GOFLAGS) ./cmd/spl
 
 # TEST TARGETS
 

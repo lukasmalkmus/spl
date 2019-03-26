@@ -5,7 +5,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golangci/golangci-lint v1.15.0
 	github.com/google/go-cmp v0.2.0
-	github.com/kr/pty v1.1.3 // indirect
+	github.com/kr/pty v1.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/gomega v1.4.3 // indirect
