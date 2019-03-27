@@ -171,7 +171,7 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 	}
 
 	decl := &ast.VarDecl{Name: ident, Type: typ}
-	p.declare(decl, nil, p.topScope, ast.Var, ident)
+	p.declare(decl, p.topScope, ast.Var, ident)
 	return decl
 }
 
@@ -180,7 +180,7 @@ func (p *Parser) parseTypeDecl() *ast.TypeDecl {
 	_ = p.expect(token.TYPE)
 	ident := p.parseIdent()
 	decl := &ast.TypeDecl{Name: ident}
-	p.declare(decl, nil, p.topScope, ast.Typ, ident)
+	p.declare(decl, p.topScope, ast.Typ, ident)
 	decl.Assign = p.expect(token.EQL)
 	decl.Type = p.parseType()
 	p.expectSemi()
@@ -200,7 +200,7 @@ func (p *Parser) parseProcDecl() *ast.ProcDecl {
 		Params: params,
 		Body:   body,
 	}
-	p.declare(decl, nil, p.pkgScope, ast.Pro, ident)
+	p.declare(decl, p.pkgScope, ast.Pro, ident)
 	return decl
 }
 
@@ -281,7 +281,7 @@ func (p *Parser) parseParameterList(scope *ast.Scope) []*ast.Field {
 		typ := p.parseVarType()
 		field := &ast.Field{Ref: ref, Name: ident, Type: typ}
 		params = append(params, field)
-		p.declare(field, nil, scope, ast.Var, ident)
+		p.declare(field, scope, ast.Var, ident)
 		p.resolve(typ)
 		if !p.atComma("parameter list", token.RPAREN) {
 			break
@@ -607,11 +607,10 @@ func (p *Parser) closeScope() {
 	p.topScope = p.topScope.Outer
 }
 
-func (p *Parser) declare(decl, data interface{}, scope *ast.Scope, kind ast.ObjKind, idents ...*ast.Ident) {
+func (p *Parser) declare(decl interface{}, scope *ast.Scope, kind ast.ObjKind, idents ...*ast.Ident) {
 	for _, ident := range idents {
 		obj := ast.NewObj(kind, ident.Name)
 		obj.Decl = decl
-		obj.Data = data
 		ident.Obj = obj
 		if ident.Name != "_" {
 			if alt := scope.Insert(obj); alt != nil {

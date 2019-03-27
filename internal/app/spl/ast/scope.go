@@ -25,11 +25,12 @@ func (s *Scope) Lookup(name string) *Object {
 // Insert attempts to insert a named object into the scope. If the scope already
 // contains an object with the same name, Insert leaves the scope unchanged and
 // returns alt. Otherwise it inserts the object and returns nil.
-func (s *Scope) Insert(obj *Object) (alt *Object) {
-	if alt = s.Objects[obj.Name]; alt == nil {
-		s.Objects[obj.Name] = obj
+func (s *Scope) Insert(obj *Object) *Object {
+	if alt, ok := s.Objects[obj.Name]; ok {
+		return alt
 	}
-	return
+	s.Objects[obj.Name] = obj
+	return nil
 }
 
 // -----------------------------------------------------------------------------
