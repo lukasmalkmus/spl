@@ -1,11 +1,3 @@
----
-project_name: gosec
-
-release:
-  github:
-    owner: securego
-    name: gosec
-
 builds:
   - main : ./cmd/gosec/
     binary: gosec
