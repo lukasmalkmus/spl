@@ -125,9 +125,7 @@ func (l *Linter) LintASTFiles(files []*ast.File, fset *token.FileSet) ([]Problem
 	}
 	var pkgName string
 	for _, f := range files {
-		// use PositionFor, not Position because of //line directives:
-		// this filename will be used for source lines extraction.
-		filename := fset.PositionFor(f.Pos(), false).Filename
+		filename := fset.Position(f.Pos()).Filename
 		if filename == "" {
 			return nil, fmt.Errorf("no file name for file %+v", f)
 		}
