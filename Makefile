@@ -87,7 +87,7 @@ install: $(GOPATH)/bin/spl
 
 lint: $(GOFILES) | $(GOLANGCI_LINT)
 	@echo ">> linting code"
-	@$(GOLANGCI_LINT) run
+	@GO111MODULE=on $(GOLANGCI_LINT) run
 
 msan: $(GOFILES)
 	@echo ">> running memory sanitizer test"
