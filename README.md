@@ -128,14 +128,14 @@ Help on flags and commands:
 spl --help
 ```
 
-### Contributing
+## Contributing
 
 Feel free to submit PRs or to fill Issues. Every kind of help is appreciated.
 
 More information about the project layout is documented
 [here](.github/project_layout.md).
 
-### License
+## License
 
 © Lukas Malkmus, 2019
 
