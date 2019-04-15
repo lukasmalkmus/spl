@@ -50,7 +50,7 @@ endif
 
 .PHONY: all bench build config cover clean dep dep-update fmt install lint msan race test tools
 
-all: lint test race bench build config
+all: fmt lint test race bench build config clean
 
 bench: $(GOFILES)
 	@echo ">> running benchmarks"
@@ -66,9 +66,9 @@ config: build
 cover: | $(COVERPROFILE)
 	@echo ">> calculating code coverage"
 	@$(GO) tool cover -func $(COVERPROFILE)
-	
+
 clean:
-	@echo ">> cleaning up build artifacts"
+	@echo ">> cleaning up artifacts"
 	@rm -rf .build
 	@rm -rf $(COVERPROFILE)
 
@@ -78,10 +78,6 @@ dep:
 	@$(GO) mod download
 	@$(GO) mod verify
 	@$(GO) mod vendor
-
-dep-update:
-	@echo ">> updating dependencies"
-	@$(GO) get -u=patch
 
 fmt: $(GOFILES)
 	@echo ">> formatting code"
