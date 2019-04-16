@@ -75,8 +75,6 @@ clean:
 dep:
 	@echo ">> installing dependencies"
 	@$(GO) mod tidy
-	@$(GO) mod download
-	@$(GO) mod verify
 	@$(GO) mod vendor
 
 fmt: $(GOFILES)
