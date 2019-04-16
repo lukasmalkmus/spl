@@ -24,10 +24,10 @@ GOLANGCI_LINT	:= $(GOPATH)/bin/golangci-lint
 COVERPROFILE 	:= coverage.out
 
 # BUILD INFORMATION
-GOFLAGS		?= -buildmode=exe -mod=vendor -tags=netgo -installsuffix=cgo \
+GOFLAGS		?= -mod=vendor -buildmode=exe -tags=netgo -installsuffix=cgo \
 				-gcflags=-trimpath=$(GOPATH)/src \
 				-asmflags=-trimpath=$(GOPATH)/src \
-				-ldflags='-s -w \
+				-ldflags='-s -w -extldflags "-static" \
 				-X $(MOD_NAME)/pkg/version.BuildTime=$(BUILD_TIME) \
 				-X $(MOD_NAME)/pkg/version.Commit=$(COMMIT) \
 				-X $(MOD_NAME)/pkg/version.Release=$(RELEASE) \
