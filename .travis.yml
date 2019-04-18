@@ -48,7 +48,7 @@ jobs:
       stage: build
       env: TARGET=darwin
       before_install:
-        - pip3 install --user awscli
+        - pip install --user awscli
         - mkdir -p ~/$TRAVIS_BUILD_NUMBER
         - aws s3 sync s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
       script: make build GOOS=$TARGET
@@ -63,7 +63,7 @@ jobs:
     - stage: release
       env: TEST_SUIT=none
       before_install:
-        - pip3 install --user awscli
+        - pip install --user awscli
         - mkdir -p ~/$TRAVIS_BUILD_NUMBER
         - aws s3 sync s3://$AWS_BUCKET_NAME/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
       script: skip
