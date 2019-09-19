@@ -14,6 +14,7 @@ const (
 	OutFormatTab               = "tab"
 	OutFormatCheckstyle        = "checkstyle"
 	OutFormatCodeClimate       = "code-climate"
+	OutFormatJunitXML          = "junit-xml"
 )
 
 var OutFormats = []string{
@@ -23,6 +24,7 @@ var OutFormats = []string{
 	OutFormatTab,
 	OutFormatCheckstyle,
 	OutFormatCodeClimate,
+	OutFormatJunitXML,
 }
 
 type ExcludePattern struct {
@@ -116,8 +118,9 @@ type Run struct {
 	Deadline              time.Duration
 	PrintVersion          bool
 
-	SkipFiles []string `mapstructure:"skip-files"`
-	SkipDirs  []string `mapstructure:"skip-dirs"`
+	SkipFiles          []string `mapstructure:"skip-files"`
+	SkipDirs           []string `mapstructure:"skip-dirs"`
+	UseDefaultSkipDirs bool     `mapstructure:"skip-dirs-use-default"`
 }
 
 type LintersSettings struct {
@@ -151,9 +154,10 @@ type LintersSettings struct {
 		MinOccurrencesCount int `mapstructure:"min-occurrences"`
 	}
 	Depguard struct {
-		ListType      string `mapstructure:"list-type"`
-		Packages      []string
-		IncludeGoRoot bool `mapstructure:"include-go-root"`
+		ListType                 string `mapstructure:"list-type"`
+		Packages                 []string
+		IncludeGoRoot            bool              `mapstructure:"include-go-root"`
+		PackagesWithErrorMessage map[string]string `mapstructure:"packages-with-error-message"`
 	}
 	Misspell struct {
 		Locale      string
@@ -161,6 +165,10 @@ type LintersSettings struct {
 	}
 	Unused struct {
 		CheckExported bool `mapstructure:"check-exported"`
+	}
+	Funlen struct {
+		Lines      int
+		Statements int
 	}
 
 	Lll      LllSettings

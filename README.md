@@ -22,7 +22,7 @@
 ## Introduction
 
 *spl* is a compiler and toolchain for a **s**imple **p**rogramming **l**anguage
-I had to build a compiler for in an university course on building compilers. The
+I had to build a compiler in an university course on building compilers. The
 design is heavily inspired by the packages of the [Go][go] language and features
 a handwritten parser as well as the two excellent books from [Thorsten Ball] on
 building an [interpreter][interpreter_book] and a [compiler][compiler_book]. 
@@ -116,7 +116,7 @@ indent = 4
 
 </details>
 
-#### Using the application
+### Using the application
 
 ```bash
 spl [flags] [commands]

@@ -15,9 +15,9 @@ var versionCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Printf("spl v%s built for %s/%s\n\n",
-			version.Release, runtime.GOOS, runtime.GOARCH)
-		cmd.Printf("Build Time: %s UTC\nCommit: %s\nGo Version: %s\nUser: %s\n",
-			version.BuildTime, version.Commit, version.GoVersion, version.User)
+			version.Release(), runtime.GOOS, runtime.GOARCH)
+		cmd.Printf("Build Time: %s\nCommit: %s\nGo Version: %s\nUser: %s\n",
+			version.BuildTime(), version.Commit(), version.GoVersion(), version.User())
 	},
 }
 

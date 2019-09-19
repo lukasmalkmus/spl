@@ -1,5 +1,11 @@
 run:
   modules-download-mode: vendor
+  skip-dirs:
+    - .build
+    - .github
+    - benchmarks
+    - bin
+    - configs
 
 linters:
   enable:
@@ -10,7 +16,11 @@ linters:
     - misspell
     - prealloc
     - stylecheck
-    # - unparam
+    - unparam
+  disable:
+    - deadcode
+    - unused
+    - varcheck
 
 linters-settings:
   gofmt:

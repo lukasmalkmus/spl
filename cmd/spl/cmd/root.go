@@ -1,11 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -44,7 +44,7 @@ func Execute() error {
 	})
 
 	// Bind matching environment variables to viper.
-	viper.SetEnvPrefix("e46")
+	viper.SetEnvPrefix("spl")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
@@ -69,7 +69,7 @@ func initConfig(cmd *cobra.Command) func() {
 		} else {
 			home, err := homedir.Dir()
 			if err != nil {
-				cmd.Println(errors.Wrap(err, "finding home directory"))
+				cmd.Println(fmt.Errorf("finding home directory: %w", err))
 				os.Exit(1)
 			}
 			viper.SetConfigName("spl")
@@ -81,7 +81,7 @@ func initConfig(cmd *cobra.Command) func() {
 		// file was not found in the search locations defined above.
 		if err := viper.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-				cmd.Println(errors.Wrap(err, "reading configuration file"))
+				cmd.Println(fmt.Errorf("reading configuration file: %w", err))
 				os.Exit(1)
 			}
 		}

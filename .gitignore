@@ -13,3 +13,16 @@
 
 # Build artifacts
 .build
+
+# Go mod timestamp for Makefile
+/dep.stamp
+
+# Local $GOBIN directory for tools
+/bin/
+
+# Benchmarks folder
+/benchmarks/
+
+# Output of the gotestsum tool
+tests.json
+junit.xml
