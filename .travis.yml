@@ -12,14 +12,10 @@ go:
 
 env:
   global:
-    - CC=clang-5.0
     - PATH=$HOME/.local/bin:$PATH
     - AWS_BUCKET_NAME=spl-travis-builds
   matrix:
     - TEST_SUIT=test
-    - TEST_SUIT=race
-    - TEST_SUIT=msan
-    - TEST_SUIT=bench
 
 matrix:
   allow_failures:
