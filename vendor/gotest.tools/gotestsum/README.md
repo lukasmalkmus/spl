@@ -37,10 +37,11 @@ gotestsum --format short-verbose
 ```
 
 Supported formats:
- * `dots` - output one character per test.
- * `short` (default) - output a line for each test package.
- * `standard-quiet` - the default `go test` format.
- * `short-verbose` - output a line for each test and package.
+ * `dots` - print a character for each test.
+ * `short` (default) - print a line for each package.
+ * `short-with-failures` - print a line for each package and failed test output.
+ * `short-verbose` - print a line for each test and package.
+ * `standard-quiet` - the standard `go test` format.
  * `standard-verbose` - the standard `go test -v` format.
 
 Have a suggestion for some other format? Please open an issue!
@@ -85,6 +86,17 @@ This file can be used to integrate with CI systems.
 ```
 gotestsum --junitfile unit-tests.xml
 ```
+
+If the package names in the `testsuite.name` or `testcase.classname` fields do not
+work with your CI system these values can be customized using the
+`--junitfile-testsuite-name`, or `--junitfile-testcase-classname` flags. These flags
+accept the following values:
+
+* `short` - the base name of the package (the single term specified by the 
+  package statement).
+* `relative` - a package path relative to the root of the repository
+* `full` - the full package path (default)
+
 
 ### JSON file output
 

@@ -43,9 +43,20 @@ func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 	result := colorEvent(event)(strings.ToUpper(string(event.Action)))
 	formatTest := func() string {
-		return fmt.Sprintf("%s %s.%s %s\n",
+		pkgPath := RelativePackagePath(event.Package)
+		// If the package path isn't the current directory, we add
+		// a period to separate the test name and the package path.
+		// If it is the current directory, we don't show it at all.
+		// This prevents output like ..MyTest when the test
+		// is in the current directory.
+		if pkgPath == "." {
+			pkgPath = ""
+		} else {
+			pkgPath += "."
+		}
+		return fmt.Sprintf("%s %s%s %s\n",
 			result,
-			relativePackagePath(event.Package),
+			pkgPath,
 			event.Test,
 			event.ElapsedFormatted())
 	}
@@ -60,7 +71,14 @@ func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 			result = colorEvent(event)("EMPTY")
 			fallthrough
 		case ActionPass, ActionFail:
-			return fmt.Sprintf("%s %s\n", result, relativePackagePath(event.Package)), nil
+			var cached string
+			if exec.Package(event.Package).cached {
+				cached = cachedMessage
+			}
+			return fmt.Sprintf("%s %s%s\n",
+				result,
+				RelativePackagePath(event.Package),
+				cached), nil
 		}
 
 	case event.Action == ActionFail:
@@ -99,11 +117,22 @@ func all(cond ...bool) bool {
 	return true
 }
 
+const cachedMessage = " (cached)"
+
 func shortFormat(event TestEvent, exec *Execution) (string, error) {
 	if !event.PackageEvent() {
 		return "", nil
 	}
+	return shortFormatPackageEvent(event, exec)
+}
+
+func shortFormatPackageEvent(event TestEvent, exec *Execution) (string, error) {
+	pkg := exec.Package(event.Package)
+
 	fmtElapsed := func() string {
+		if pkg.cached {
+			return cachedMessage
+		}
 		d := elapsedDuration(event.Elapsed)
 		if d == 0 {
 			return ""
@@ -111,16 +140,15 @@ func shortFormat(event TestEvent, exec *Execution) (string, error) {
 		return fmt.Sprintf(" (%s)", d)
 	}
 	fmtCoverage := func() string {
-		pkg := exec.Package(event.Package)
 		if pkg.coverage == "" {
 			return ""
 		}
-		return "     (" + pkg.coverage + ")"
+		return " (" + pkg.coverage + ")"
 	}
 	fmtEvent := func(action string) (string, error) {
 		return fmt.Sprintf("%s  %s%s%s\n",
 			action,
-			relativePackagePath(event.Package),
+			RelativePackagePath(event.Package),
 			fmtElapsed(),
 			fmtCoverage(),
 		), nil
@@ -137,6 +165,16 @@ func shortFormat(event TestEvent, exec *Execution) (string, error) {
 	return "", nil
 }
 
+func shortWithFailuresFormat(event TestEvent, exec *Execution) (string, error) {
+	if !event.PackageEvent() {
+		if event.Action == ActionFail {
+			return exec.Output(event.Package, event.Test), nil
+		}
+		return "", nil
+	}
+	return shortFormatPackageEvent(event, exec)
+}
+
 func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	pkg := exec.Package(event.Package)
 	withColor := colorEvent(event)
@@ -145,7 +183,7 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	case event.PackageEvent():
 		return "", nil
 	case event.Action == ActionRun && pkg.Total == 1:
-		return "[" + relativePackagePath(event.Package) + "]", nil
+		return "[" + RelativePackagePath(event.Package) + "]", nil
 	case event.Action == ActionPass:
 		return withColor("·"), nil
 	case event.Action == ActionFail:
@@ -183,6 +221,8 @@ func NewEventFormatter(format string) EventFormatter {
 		return shortVerboseFormat
 	case "short":
 		return shortFormat
+	case "short-with-failures":
+		return shortWithFailuresFormat
 	default:
 		return nil
 	}

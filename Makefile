@@ -32,6 +32,9 @@ GOFLAGS			?= -buildmode=exe -tags=netgo -installsuffix=cgo -trimpath \
 GOTESTSUM_FLAGS	?= --jsonfile tests.json --junitfile junit.xml
 GO_TEST_FLAGS 	?= -race -coverprofile=$(COVERPROFILE)
 
+# DEPENDENCIES
+GOMODDEPS = go.mod go.sum
+
 # Enable verbose test output if explicitly set.
 ifdef VERBOSE
 	GOTESTSUM_FLAGS	+= --format=standard-verbose
