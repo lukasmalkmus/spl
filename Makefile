@@ -151,14 +151,14 @@ $(COVERPROFILE):
 
 # TOOLS
 
-$(BENCHSTAT): $(GOMODDEPS)
+$(BENCHSTAT): $(GOMODDEPS) $(call go-pkg-sourcefiles, ./vendor/golang.org/x/perf/cmd/benchstat)
 	@echo ">> installing benchstat"
 	@$(GO) install golang.org/x/perf/cmd/benchstat
 
-$(GOLANGCI_LINT): $(GOMODDEPS)
+$(GOLANGCI_LINT): $(GOMODDEPS) $(call go-pkg-sourcefiles, ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint)
 	@echo ">> installing golangci-lint"
 	@$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint
 
-$(GOTESTSUM): $(GOMODDEPS)
+$(GOTESTSUM): $(GOMODDEPS) $(call go-pkg-sourcefiles, ./vendor/gotest.tools/gotestsum)
 	@echo ">> installing gotestsum"
 	@$(GO) install gotest.tools/gotestsum
