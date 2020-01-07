@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -24,10 +24,10 @@ https://homepages.thm.de/~hg52/lv/compiler/praktikum/SPL-1.2.html
 > Source & Copyright Information: https://github.com/lukasmalkmus/spl`,
 }
 
-// Execute sets up the root command and executes it. An error is returned but
+// Sets up the root command and executes it. An error is returned but
 // handled internaly by cobra. The calling function should not handle the error
 // but fail gracefully.
-func Execute() error {
+func main() {
 	// Persistent flags available to the root command and all of its children.
 	// Configuration flags which go hand in hand with the configuration
 	// specified in the configuration file and environment. Only available to
@@ -54,7 +54,9 @@ func Execute() error {
 	// Silence the usage message of the root command.
 	rootCmd.SilenceUsage = true
 
-	return rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 // initConfig reads the configuration using the provider viper instance.

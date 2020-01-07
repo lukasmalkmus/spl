@@ -1,43 +1,45 @@
 # TOOLCHAIN
-GO				?= CGO_ENABLED=0 GOFLAGS=-mod=vendor GOBIN=$(CURDIR)/bin go
-GO_BIN_IN_PATH	?= CGO_ENABLED=0 GOFLAGS=-mod=vendor go
-GO_NO_VENDOR	?= CGO_ENABLED=0 GOBIN=$(CURDIR)/bin go
-GOFMT			?= $(GO)fmt
+GO				:= CGO_ENABLED=0 GOFLAGS=-mod=vendor GOBIN=$(CURDIR)/bin go
+GO_BIN_IN_PATH	:= CGO_ENABLED=0 GOFLAGS=-mod=vendor go
+GO_NO_VENDOR	:= CGO_ENABLED=0 GOBIN=$(CURDIR)/bin go
+GOFMT			:= $(GO)fmt
 
 # ENVIRONMENT
 VERBOSE 	=
 GOPATH		:= $(GOPATH)
-GOOS		:= $(shell echo $(shell uname -s) | tr A-Z a-z)
-GOARCH		:= amd64
+GOOS		?= $(shell echo $(shell uname -s) | tr A-Z a-z)
+GOARCH		?= amd64
 MOD_NAME	:= github.com/lukasmalkmus/spl
 
 # APPLICATION INFORMATION
-BUILD_TIME	?= $(shell date -u '+%Y-%m-%d_%H:%M:%S')
-COMMIT		?= $(shell git rev-parse --short HEAD)
-RELEASE		?= $(shell cat VERSION)
-USER		?= $(shell whoami)
+BUILD_TIME	:= $(shell date -u '+%Y-%m-%d_%H:%M:%S')
+COMMIT		:= $(shell git rev-parse --short HEAD)
+RELEASE		:= $(shell cat VERSION)
+USER		:= $(shell whoami)
 
 # TOOLS
-BENCHSTAT				:= bin/benchstat
-GOLANGCI_LINT   		:= bin/golangci-lint
-GOTESTSUM   		    := bin/gotestsum
+BENCHSTAT		:= bin/benchstat
+GOLANGCI_LINT	:= bin/golangci-lint
+GOTESTSUM		:= bin/gotestsum
 
 # FLAGS
-GOFLAGS			?= -buildmode=exe -tags=netgo -installsuffix=cgo -trimpath \
-					-ldflags='-s -w -extldflags "-static" \
+GOFLAGS			:= -buildmode=exe -tags='osusergo netgo static_build' \
+					-installsuffix=cgo -trimpath \
+					-ldflags='-s -w -extldflags "-fno-PIC -static" \
 					-X $(MOD_NAME)/pkg/version.buildTime=$(BUILD_TIME) \
 					-X $(MOD_NAME)/pkg/version.commit=$(COMMIT) \
 					-X $(MOD_NAME)/pkg/version.release=$(RELEASE) \
 					-X $(MOD_NAME)/pkg/version.user=$(USER)'
-GOTESTSUM_FLAGS	?= --jsonfile tests.json --junitfile junit.xml
-GO_TEST_FLAGS 	?= -race -coverprofile=$(COVERPROFILE)
+GOTESTSUM_FLAGS := --jsonfile=tests.json --junitfile=junit.xml
+GO_TEST_FLAGS   := -race -coverprofile=$(COVERPROFILE)
+GO_BENCH_FLAGS  := -run='$^' -bench=. -benchmem -count=5 -timeout=30m
 
 # DEPENDENCIES
 GOMODDEPS = go.mod go.sum
 
 # Enable verbose test output if explicitly set.
 ifdef VERBOSE
-	GOTESTSUM_FLAGS	+= --format=standard-verbose
+	GOTESTSUM_FLAGS += --format=standard-verbose
 endif
 
 # MISC
@@ -46,7 +48,7 @@ DIRTY			:= $(shell git diff-index --quiet HEAD || echo "untracked")
 
 # FUNCS
 # func go-list-pkg-sources(package)
-go-list-pkg-sources = $(GO) list $(GOFLAGS) -f '{{ range $$index, $$filename := .GoFiles }}{{ $$.Dir }}/{{ $$filename }}{{end}}' $(1)
+go-list-pkg-sources = $(GO) list $(GOFLAGS) -f '{{ range $$index, $$filename := .GoFiles }}{{ $$.Dir }}/{{ $$filename }} {{end}}' $(1)
 # func go-pkg-sourcefiles(package)
 go-pkg-sourcefiles = $(shell $(call go-list-pkg-sources,$(strip $1)))
 
@@ -58,10 +60,10 @@ bench: $(BENCHSTAT) ## Runs all benchmarks and compares the benchmark results of
 	@echo ">> running benchmarks"
 	@mkdir -p benchmarks
 ifneq ($(DIRTY),untracked)
-	@$(GO) test -run='$^' -bench=. -benchmem -count=5 ./... > benchmarks/$(COMMIT).txt
+	@$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(COMMIT).txt
 	@$(BENCHSTAT) benchmarks/$(COMMIT).txt
 else
-	@$(GO) test -run='$^' -bench=. -benchmem -count=5 ./... > benchmarks/$(COMMIT)-dirty.txt
+	@$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(COMMIT)-dirty.txt
 	@$(BENCHSTAT) benchmarks/$(COMMIT).txt benchmarks/$(COMMIT)-dirty.txt
 endif
 
